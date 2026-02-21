@@ -1,0 +1,34 @@
+name: Build DOOM OS
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Make script executable
+      run: chmod +x build.sh
+
+    - name: Build ISO
+      run: ./build.sh
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: doom-os
+        path: build/doom-os.iso
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: github.ref == 'refs/heads/main'
+      with:
+        tag_name: auto-build
+        name: DOOM OS Build
+        files: build/doom-os.iso
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
